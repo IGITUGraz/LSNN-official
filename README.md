@@ -21,6 +21,7 @@ ICLR 2018, https://arxiv.org/abs/1711.05136
 
 
 ### Installation
+The code is compatible with python 3.4 to 3.7 and tensorflow 1.7 to 1.12 (CPU and GPU versions).
 
 From the main folder run:  
 `` pip3 install --user .``  

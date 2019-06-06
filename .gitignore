@@ -1,0 +1,17 @@
+.idea/
+/__pycache__/
+/**/__pycache__/
+*.pkl
+*.png
+.ipynb_checkpoints
+ipython-log.py
+results
+**/*.swp
+**/*.eps
+**/*.log
+dump.rdb
+**/tmp
+output
+ignored
+*.egg-info
+MNIST_data

@@ -534,8 +534,8 @@ if FLAGS.save_data:
         test_dict = get_data_dict(FLAGS.batch_test)
         feed_dict_with_placeholder_container(test_dict, init_state_holder, last_final_state_state_testing_pointer[0])
 
-        results_values, plot_results_values, in_spk, spk, spk_con, target_nums_np, z_sum_np = sess.run(
-            [results_tensors, plot_result_tensors, input_spikes, z, z_con, target_nums, out_plot_char_step],
+        results_values, plot_results_values = sess.run(
+            [results_tensors, plot_result_tensors],
             feed_dict=test_dict)
         last_final_state_state_testing_pointer[0] = results_values['final_state']
         test_errors.append(results_values['recall_errors'])

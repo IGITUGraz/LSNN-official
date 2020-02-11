@@ -26,43 +26,35 @@ FLAGS = tf.app.flags.FLAGS
 start_time = datetime.datetime.now()
 
 ##
-tf.app.flags.DEFINE_string('model', 'ALIF', 'Chosen the network model')
 tf.app.flags.DEFINE_string('comment', '', 'comment to retrieve the stored results')
 ##
-tf.app.flags.DEFINE_integer('batch_train', 128, 'batch size fo the validation set')
+tf.app.flags.DEFINE_integer('batch_train', 128, 'batch size fo the training set')
 tf.app.flags.DEFINE_integer('batch_val', 128, 'batch size of the validation set')
 tf.app.flags.DEFINE_integer('batch_test', 128, 'batch size of the testing set')
-tf.app.flags.DEFINE_integer('n_charac', 2, 'number of characters in the recall task')
 tf.app.flags.DEFINE_integer('n_in', 100, 'number of input units.')
-tf.app.flags.DEFINE_integer('n_rec', 10, 'number of recurrent units.')
-tf.app.flags.DEFINE_integer('n_con', 10, 'number of controller units')
+tf.app.flags.DEFINE_integer('n_lif', 10, 'number of recurrent units.')
+tf.app.flags.DEFINE_integer('n_alif', 10, 'number of controller units')
 tf.app.flags.DEFINE_integer('f0', 50, 'input firing rate')
 tf.app.flags.DEFINE_integer('reg_rate', 10, 'target rate for regularization')
-tf.app.flags.DEFINE_integer('reg_max_rate', 100, 'target rate for regularization')
-tf.app.flags.DEFINE_integer('n_iter', 200, 'number of iterations')
-tf.app.flags.DEFINE_integer('n_delay', 10, 'number of delays')
+tf.app.flags.DEFINE_integer('n_iter', 200, 'number of training iterations')
+tf.app.flags.DEFINE_integer('n_delay', 10, 'maximum synaptic delay')
 tf.app.flags.DEFINE_integer('n_ref', 3, 'Number of refractory steps')
 tf.app.flags.DEFINE_integer('seq_len', 12, 'Number of character steps')
 tf.app.flags.DEFINE_integer('seq_delay', 6, 'Expected delay in character steps. Must be <= seq_len - 2')
-tf.app.flags.DEFINE_integer('tau_char', 200, 'Duration of symbols')
+tf.app.flags.DEFINE_integer('tau_char', 200, 'Duration of symbols (frequency of input value changes)')
 tf.app.flags.DEFINE_integer('seed', -1, 'Random seed.')
 tf.app.flags.DEFINE_integer('lr_decay_every', 100, 'Decay every')
-tf.app.flags.DEFINE_integer('print_every', 20, 'Decay every')
+tf.app.flags.DEFINE_integer('print_every', 20, 'Validation frequency')
 ##
 tf.app.flags.DEFINE_float('stop_crit', 0.05, 'Stopping criterion. Stops training if error goes below this value')
-tf.app.flags.DEFINE_float('beta', 1.7, 'Mikolov adaptive threshold beta scaling parameter')
-tf.app.flags.DEFINE_float('tau_a', 1200, 'Mikolov model alpha - threshold decay')
+tf.app.flags.DEFINE_float('thr', .01, 'Baseline threshold at which the LSNN neurons spike')
+tf.app.flags.DEFINE_float('beta', 1.7, 'adaptive threshold beta scaling parameter')
+tf.app.flags.DEFINE_float('tau_a', 1200, 'adaptation time constant (threshold decay time constant)')
 tf.app.flags.DEFINE_float('tau_out', 20, 'tau for PSP decay in LSNN and output neurons')
-tf.app.flags.DEFINE_float('learning_rate', 0.01, 'Base learning rate.')
-tf.app.flags.DEFINE_float('lr_decay', 0.3, 'Decaying factor')
-tf.app.flags.DEFINE_float('reg', 1e-2, 'regularization coefficient')
-tf.app.flags.DEFINE_float('rewiring_connectivity', -1, 'possible usage of rewiring with ALIF and LIF (0.1 is default)')
-tf.app.flags.DEFINE_float('readout_rewiring_connectivity', -1, '')
-tf.app.flags.DEFINE_float('rewiring_temperature', 0, '')
-tf.app.flags.DEFINE_float('dampening_factor', 0.3, '')
-tf.app.flags.DEFINE_float('stochastic_factor', -1, '')
-tf.app.flags.DEFINE_float('dt', 1., '(ms) simulation step')
-tf.app.flags.DEFINE_float('thr', .01, 'threshold at which the LSNN neurons spike')
+tf.app.flags.DEFINE_float('learning_rate', 0.01, 'Base learning rate')
+tf.app.flags.DEFINE_float('lr_decay', 0.3, 'Learning rate decaying factor')
+tf.app.flags.DEFINE_float('reg', 1e-2, 'Firing rate regularization coefficient (scaling regularization loss)')
+tf.app.flags.DEFINE_float('dampening_factor', 0.3, 'Parameter necessary to approximate the spike derivative')
 ##
 tf.app.flags.DEFINE_bool('save_data', True, 'Save the data (training, test, network, trajectory for plotting)')
 tf.app.flags.DEFINE_bool('do_plot', True, 'Perform plots')
@@ -90,7 +82,6 @@ print_every = FLAGS.print_every
 # Frequencies
 input_f0 = FLAGS.f0 / 1000  # in kHz in coherence with the usgae of ms for time
 regularization_f0 = FLAGS.reg_rate / 1000
-regularization_f0_max = FLAGS.reg_max_rate / 1000
 
 # Network parameters
 tau_v = FLAGS.tau_out
@@ -98,7 +89,7 @@ thr = FLAGS.thr
 
 decay = np.exp(-dt / FLAGS.tau_out)  # output layer psp decay, chose value between 15 and 30ms as for tau_v
 # Symbol number
-n_charac = FLAGS.n_charac  # Number of digit symbols
+n_charac = 2  # Number of digit symbols
 n_input_symbols = n_charac + 2  # Total number of symbols including recall and store
 n_output_symbols = n_charac  # Number of output symbols
 recall_symbol = n_input_symbols - 1  # ID of the recall symbol
@@ -108,15 +99,15 @@ store_symbol = n_input_symbols - 2  # ID of the store symbol
 input_neuron_split = np.array_split(np.arange(FLAGS.n_in), n_input_symbols)
 
 # Generate the cell
-beta = np.concatenate([np.zeros(FLAGS.n_rec), np.ones(FLAGS.n_con) * FLAGS.beta])
-cell = ALIF(n_in=FLAGS.n_in, n_rec=FLAGS.n_rec + FLAGS.n_con, tau=tau_v, n_delay=FLAGS.n_delay, beta=beta, thr=thr,
+beta = np.concatenate([np.zeros(FLAGS.n_lif), np.ones(FLAGS.n_alif) * FLAGS.beta])
+cell = ALIF(n_in=FLAGS.n_in, n_rec=FLAGS.n_lif + FLAGS.n_alif, tau=tau_v, n_delay=FLAGS.n_delay, beta=beta, thr=thr,
             n_refractory=FLAGS.n_ref, dt=dt, tau_adaptation=FLAGS.tau_a, dampening_factor=FLAGS.dampening_factor)
 
 cell_name = type(cell).__name__
 print('\n -------------- \n' + cell_name + '\n -------------- \n')
 time_stamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 file_reference = '{}_{}_seqlen{}_seqdelay{}_in{}_R{}_A{}_lr{}_tauchar{}_comment{}'.format(
-    time_stamp, cell_name, FLAGS.seq_len, FLAGS.seq_delay, FLAGS.n_in, FLAGS.n_rec, FLAGS.n_con, FLAGS.learning_rate,
+    time_stamp, cell_name, FLAGS.seq_len, FLAGS.seq_delay, FLAGS.n_in, FLAGS.n_lif, FLAGS.n_alif, FLAGS.learning_rate,
     FLAGS.tau_char, FLAGS.comment)
 print('FILE REFERENCE: ' + file_reference)
 
@@ -130,7 +121,7 @@ target_nums = tf.placeholder(dtype=tf.int64, shape=(None, None),
 recall_mask = tf.placeholder(dtype=tf.bool, shape=(None, None),
                              name='RecallMask')  # Binary tensor that points to the time of presentation of a recall
 
-# Other placeholder that are useful for computing accuracy and debuggin
+# Other placeholder that are useful for computing accuracy and debugging
 target_sequence = tf.placeholder(dtype=tf.int64, shape=(None, None),
                                  name='TargetSequence')  # The target characters with time expansion
 batch_size_holder = tf.placeholder(dtype=tf.int32, name='BatchSize')  # Int that contains the batch size
@@ -144,7 +135,7 @@ def get_data_dict(batch_size, seq_len=FLAGS.seq_len, batch=None, override_input=
         batch_size=batch_size,
         f0=input_f0,
         sentence_length=seq_len,
-        n_character=FLAGS.n_charac,
+        n_character=2,
         n_charac_duration=FLAGS.tau_char,
         n_neuron=FLAGS.n_in,
         prob_signals=p_sr,
@@ -156,7 +147,7 @@ def get_data_dict(batch_size, seq_len=FLAGS.seq_len, batch=None, override_input=
 
     return data_dict
 
-# Define the name of spike train for the different models
+
 outputs, final_state = tf.nn.dynamic_rnn(cell, input_spikes, initial_state=init_state_holder, dtype=tf.float32)
 z, v, thr = outputs
 
@@ -164,7 +155,6 @@ with tf.name_scope('RecallLoss'):
     target_nums_at_recall = tf.boolean_mask(target_nums, recall_charac_mask)
     Y = tf.one_hot(target_nums_at_recall, depth=n_output_symbols, name='Target')
 
-    # MTP models do not use controller (modulator) population for output
     out_neurons = z
     n_neurons = out_neurons.get_shape()[2]
     psp = exp_convolve(out_neurons, decay=decay)
@@ -195,8 +185,6 @@ with tf.name_scope('RegularizationLoss'):
 
 # Aggregate the losses
 with tf.name_scope('OptimizationScheme'):
-    # scaling loss_recall to match order of magnitude of loss from script_recall.py
-    # this is needed to keep the same regularization coefficients (reg, regl2) across scripts
     global_step = tf.Variable(0, dtype=tf.int32, trainable=False)
     learning_rate = tf.Variable(FLAGS.learning_rate, dtype=tf.float32, trainable=False)
     decay_learning_rate_op = tf.assign(learning_rate, learning_rate * FLAGS.lr_decay)
@@ -224,7 +212,7 @@ if FLAGS.do_plot:
     fig.canvas.set_window_title(socket.gethostname() + ' - ' + FLAGS.comment)
 
 
-def update_plot(plot_result_values, batch=0, n_max_neuron_per_raster=20, n_max_synapses=FLAGS.n_con):
+def update_plot(plot_result_values, batch=0, n_max_neuron_per_raster=20, n_max_synapses=FLAGS.n_alif):
     """
     This function iterates the matplotlib figure on every call.
     It plots the data for a fixed sequence that should be representative of the expected computation
@@ -333,6 +321,7 @@ def update_plot(plot_result_values, batch=0, n_max_neuron_per_raster=20, n_max_s
     if FLAGS.do_plot:
         plt.draw()
         plt.pause(1)
+
 
 test_loss_list = []
 test_loss_with_reg_list = []
@@ -472,7 +461,7 @@ for k_iter in range(FLAGS.n_iter):
         if FLAGS.do_plot and FLAGS.monitor_plot:
             update_plot(plot_results_values)
             tmp_path = os.path.join(result_folder,
-                                    'tmp/figure' + start_time.strftime("%H%M") + '_' + FLAGS.model + '_' +
+                                    'tmp/figure' + start_time.strftime("%H%M") + '_' +
                                     str(k_iter) + '.pdf')
             if not os.path.exists(os.path.join(result_folder, 'tmp')):
                 os.makedirs(os.path.join(result_folder, 'tmp'))

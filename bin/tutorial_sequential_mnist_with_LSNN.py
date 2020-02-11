@@ -13,16 +13,12 @@ One should get approximately:
 - 40% accuracy in 100 iterations
 - 60% in 200 iterations (about 30 minutes in our CPUs and faster with GPUs)
 - you should eventually get above 90% with 20k ~ 30k iterations.
-Best runs should achieve up to 96% in 36k iterations.
+Best runs should achieve up to 96% in 36k iterations (takes ~24h on GTX1080).
 '''
-
-import matplotlib
 
 from lsnn.toolbox.tensorflow_einsums.einsum_re_written import einsum_bij_jk_to_bik
 
-import datetime
 import os
-import socket
 from time import time
 
 import matplotlib.pyplot as plt
@@ -41,48 +37,50 @@ FLAGS = tf.app.flags.FLAGS
 
 ##
 tf.app.flags.DEFINE_string('comment', '', 'comment to retrieve the stored results')
-tf.app.flags.DEFINE_string('resume', '', 'Path to the checkpoint of the form "results/script_name/2018_.../session"')
+tf.app.flags.DEFINE_string('resume', '', 'path to the checkpoint of the form "results/script_name/2018_.../session"')
 tf.app.flags.DEFINE_string('model', 'LSNN', 'spiking network model to use: LSNN or LIF')
 tf.app.flags.DEFINE_bool('save_data', True, 'whether to save simulation data in result folder')
 tf.app.flags.DEFINE_bool('downsampled', False, 'whether to use the smaller downsampled mnist dataset of not')
 ##
-tf.app.flags.DEFINE_integer('n_batch_train', 256, 'batch size fo the validation set')
-tf.app.flags.DEFINE_integer('n_batch_validation', 256, 'batch size fo the validation set')
-tf.app.flags.DEFINE_integer('n_in', 80, 'number of input units to convert gray level input spikes.')
-tf.app.flags.DEFINE_integer('n_regular', 120, 'number of regular spiking units in the recurrent layer.')
+tf.app.flags.DEFINE_integer('n_batch_train', 256, 'size of the training minibatch')
+tf.app.flags.DEFINE_integer('n_batch_validation', 256, 'size of the validation minibatch')
+tf.app.flags.DEFINE_integer('n_in', 80, 'number of input units')
+tf.app.flags.DEFINE_integer('n_regular', 120, 'number of regular spiking units in the recurrent layer')
 tf.app.flags.DEFINE_integer('n_adaptive', 100, 'number of adaptive spiking units in the recurrent layer')
 tf.app.flags.DEFINE_integer('reg_rate', 10, 'target firing rate for regularization')
-tf.app.flags.DEFINE_integer('n_iter', 36000, 'number of iterations')
-tf.app.flags.DEFINE_integer('n_delay', 10, 'number of delays')
-tf.app.flags.DEFINE_integer('n_ref', 5, 'Number of refractory steps')
-tf.app.flags.DEFINE_integer('lr_decay_every', 2500, 'Decay learning rate every n steps')
-tf.app.flags.DEFINE_integer('print_every', 400, '')
-tf.app.flags.DEFINE_integer('ext_time', 1, 'Repeat factor to extend time of mnist task')
+tf.app.flags.DEFINE_integer('n_iter', 36000, 'number of training iterations')
+tf.app.flags.DEFINE_integer('n_delay', 10, 'maximum synaptic delay')
+tf.app.flags.DEFINE_integer('n_ref', 5, 'number of refractory steps')
+tf.app.flags.DEFINE_integer('lr_decay_every', 2500, 'decay learning rate every lr_decay_every steps')
+tf.app.flags.DEFINE_integer('print_every', 400, 'frequency of validation')
+tf.app.flags.DEFINE_integer('ext_time', 1, 'repeat factor to extend time of mnist task')
 ##
 tf.app.flags.DEFINE_float('beta', 1.8, 'Scaling constant of the adaptive threshold')
-# to solve safely set tau_a == expected recall delay
+# to solve a task successfully we usually set tau_a to be close to the expected delay / memory length needed
 tf.app.flags.DEFINE_float('tau_a', 700, 'Adaptation time constant')
 tf.app.flags.DEFINE_float('tau_v', 20, 'Membrane time constant of output readouts')
 tf.app.flags.DEFINE_float('thr', 0.01, 'Baseline threshold voltage')
-tf.app.flags.DEFINE_float('learning_rate', 1e-2, 'Base learning rate.')
+tf.app.flags.DEFINE_float('learning_rate', 1e-2, 'Base learning rate')
 tf.app.flags.DEFINE_float('lr_decay', 0.8, 'Decaying factor')
 tf.app.flags.DEFINE_float('reg', 1e-1, 'regularization coefficient to target a specific firing rate')
 tf.app.flags.DEFINE_float('rewiring_temperature', 0., 'regularization coefficient')
 tf.app.flags.DEFINE_float('proportion_excitatory', 0.75, 'proportion of excitatory neurons')
-tf.app.flags.DEFINE_float('V0', 1., 'proportion of excitatory neurons')
 ##
-tf.app.flags.DEFINE_bool('interactive_plot', False, 'Perform plots')
+tf.app.flags.DEFINE_bool('interactive_plot', False, 'Perform plotting')
 tf.app.flags.DEFINE_bool('verbose', True, 'Print many info during training')
 tf.app.flags.DEFINE_bool('neuron_sign', True,
-                         'If rewiring is active, this will fix the sign of input and recurrent neurons')
-tf.app.flags.DEFINE_bool('crs_thr', True, 'Generate spikes with threshold crossing method')
-tf.app.flags.DEFINE_float('rewiring_connectivity', 0.12,
-                          'possible usage of rewiring with ALIF and LIF (0.2 and 0.5 have been tested)')
-tf.app.flags.DEFINE_float('l1', 1e-2, 'l1 regularization that goes with rewiring (irrelevant without rewiring)')
+                         "If rewiring is active, this will fix the sign of neurons (Dale's law)")
+tf.app.flags.DEFINE_bool('crs_thr', True, 'Encode pixels to spikes with threshold crossing method')
+# With simple grid search we found that setting rewiring to 12% yields optimal results
+tf.app.flags.DEFINE_float('rewiring_connectivity', 0.12, 'max connectivity limit in the network (-1 turns off DEEP R)')
+tf.app.flags.DEFINE_float('l1', 1e-2, 'l1 regularization used in rewiring (irrelevant without rewiring)')
 tf.app.flags.DEFINE_float('dampening_factor', 0.3, 'Parameter necessary to approximate the spike derivative')
 # Analog values are fed to only single neuron
 if not FLAGS.crs_thr:
     FLAGS.n_in = 1
+
+assert FLAGS.model in ['LSNN', 'LIF'], "Model must be LSNN or LIF"
+assert not (FLAGS.model == 'LIF' and FLAGS.n_adaptive > 0), "LIF network can not contain adaptive neurons!"
 
 # Define the flag object as dictionnary for saving purposes
 _, storage_path, flag_dict = get_storage_path_reference(__file__, FLAGS, './results/', flags=False,
@@ -116,9 +114,11 @@ else:
     in_neuron_sign = None
     rec_neuron_sign = None
 
-# Define the cell
-beta = np.concatenate([np.zeros(FLAGS.n_regular), np.ones(FLAGS.n_adaptive) * FLAGS.beta])
+# Define the network
 if FLAGS.model == 'LSNN':
+    # We set beta == 0 to some of the neurons. Those neurons then behave like LIF neurons (without adaptation).
+    # And this is how we achieve a mixture of LIF and ALIF neurons in the LSNN model.
+    beta = np.concatenate([np.zeros(FLAGS.n_regular), np.ones(FLAGS.n_adaptive) * FLAGS.beta])
     cell = ALIF(n_in=FLAGS.n_in, n_rec=FLAGS.n_regular + FLAGS.n_adaptive, tau=FLAGS.tau_v, n_delay=FLAGS.n_delay,
                 n_refractory=FLAGS.n_ref, dt=dt, tau_adaptation=FLAGS.tau_a, beta=beta, thr=FLAGS.thr,
                 rewiring_connectivity=FLAGS.rewiring_connectivity,
@@ -148,7 +148,6 @@ def find_onset_offset(y, threshold):
     Given the input signal `y` with samples,
     find the indices where `y` increases and descreases through the value `threshold`.
     Return stacked binary arrays of shape `y` indicating onset and offset threshold crossings.
-
     `y` must be 1-D numpy arrays.
     """
     if threshold == 1:
@@ -172,13 +171,9 @@ def find_onset_offset(y, threshold):
 
 
 def get_data_dict(batch_size, type='train'):
-    '''
+    """
     Generate the dictionary to be fed when running a tensorflow op.
-
-    :param batch_size:
-    :param test:
-    :return:
-    '''
+    """
     if type == 'test':
         input_px, target_oh = mnist.test.next_batch(batch_size, shuffle=False)
     elif type == 'validation':
@@ -222,6 +217,7 @@ def get_data_dict(batch_size, type='train'):
     # transform target one hot from batch x classes to batch x time x classes
     data_dict = {input_pixels: spike_stack, targets: target_num}
     return data_dict, input_px
+
 
 if not FLAGS.crs_thr and FLAGS.downsampled:
     inputs = tf.reshape(input_pixels,[-1,28,28,1])
@@ -318,7 +314,7 @@ tau_delay_list = []
 training_time_list = []
 time_to_ref_list = []
 
-# Dictionaries of tensorflow ops to be evaluated simualtenously by a session
+# Dictionaries of tensorflow ops to be evaluated simultaneously by a session
 results_tensors = {'loss': loss,
                    'loss_reg': loss_regularization,
                    'loss_recall': loss_recall,
@@ -444,16 +440,13 @@ if FLAGS.interactive_plot:
     update_mnist_plot(ax_list, fig, plt, cell, FLAGS, plot_results_values)
 
 
-# Saving setup
-# Get a meaning full fill name and so on
-
-# Save a sample trajectory
 if FLAGS.save_data:
     # Save the tensorflow graph
     saver.save(sess, os.path.join(storage_path, 'session'))
     saver.export_meta_graph(os.path.join(storage_path, 'graph.meta'))
     print("Network meta graph and session saved. Now testing...")
 
+    # Testing
     test_errors = []
     n_test_batches = (mnist.test.num_examples//FLAGS.n_batch_validation) + 1
     for i in range(n_test_batches):  # cover the whole test set

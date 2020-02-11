@@ -1,6 +1,6 @@
 Copyright (C) 2019 the LSNN team, TU Graz
 
-### LSNN: Efficient spiking recurrent neural networks
+# LSNN: Efficient spiking recurrent neural networks
 
 This repository provides a tensorflow library and a tutorial train a recurrent spiking neural network (ours is called LSNN).
 For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2].
@@ -20,8 +20,11 @@ Guillaume Bellec, David Kappel, Wolfgang Maass, Robert Legenstein
 ICLR 2018, https://arxiv.org/abs/1711.05136
 
 
-### Installation
+## Installation
 The code is compatible with python 3.4 to 3.7 and tensorflow 1.7 to 1.12 (CPU and GPU versions).
+
+> You can run the training scripts **without installation** by temporarily including the repo directory
+> in your python path like so: `` PYTHONPATH=. python3 bin/tutorial_sequential_mnist_with_LSNN.py`` 
 
 From the main folder run:  
 `` pip3 install --user .``  
@@ -29,6 +32,18 @@ You can now import the tensorflow cell called ALIF (for adaptive leakey integrat
 Warning, the GPU compatible version of tensorflow is not part of the requirements by default.
 To use GPUs one should also install it:
  ``pip3 install --user tensorflow-gpu``.
+
+## Training and evaluation
+
+To train an LSNN on the sequential MNISt (sMNIST) task, run from the main folder:  
+``python3 bin/tutorial_sequential_mnist_with_LSNN.py``  
+This will reproduce the result labeled "DEEP R LSNN" in the Figure 1B of [1] with 1ms per pixel.
+
+To train an LSNN on the store-recall task, run from the main folder:  
+``python3 bin/tutorial_storerecall_with_LSNN.py``  
+This will also plot the input, network spikes, output and thresholds during training.
+
+Use flags to configure plotting and other parameters of the task, network or simulation.
 
 ## Troubleshooting
 

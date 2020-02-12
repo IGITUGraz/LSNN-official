@@ -27,15 +27,6 @@ from time import time
 
 Cell = tf.contrib.rnn.BasicRNNCell
 
-def map_to_named_tuple(S, f):
-    state_dict = S._asdict()
-    new_state_dict = OrderedDict({})
-    for k, v in state_dict.items():
-        new_state_dict[k] = f(v)
-
-    new_named_tuple = S.__class__(**new_state_dict)
-    return new_named_tuple
-
 
 def placeholder_container_for_rnn_state(cell_state_size, dtype, batch_size, name='TupleStateHolder'):
     with tf.name_scope(name):
@@ -48,17 +39,6 @@ def placeholder_container_for_rnn_state(cell_state_size, dtype, batch_size, name
             placeholder_dict[k] = tf.placeholder(shape=shape, dtype=dtype, name=k)
 
         placeholder_tuple = cell_state_size.__class__(**placeholder_dict)
-        return placeholder_tuple
-
-
-def placeholder_container_from_example(state_example, name='TupleStateHolder'):
-    with tf.name_scope(name):
-        default_dict = state_example._asdict()
-        placeholder_dict = OrderedDict({})
-        for k, v in default_dict.items():
-            placeholder_dict[k] = tf.placeholder(shape=v.shape, dtype=v.dtype, name=k)
-
-        placeholder_tuple = state_example.__class__(**placeholder_dict)
         return placeholder_tuple
 
 
@@ -79,7 +59,7 @@ def feed_dict_with_placeholder_container(dict_to_update, state_holder, state_val
 
 
 #################################
-# Rewirite the Spike function without hack
+# Spike function
 #################################
 
 @tf.custom_gradient

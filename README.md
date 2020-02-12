@@ -1,6 +1,4 @@
-Copyright (C) 2019 the LSNN team, TU Graz
-
-# LSNN: Efficient spiking recurrent neural networks
+# LSNN: Long short-term memory Spiking Neural Networks
 
 This repository provides a tensorflow library and a tutorial train a recurrent spiking neural network (ours is called LSNN).
 For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2].
@@ -63,3 +61,19 @@ A known workaround is to reinstall the LSNN package with older tensorflow versio
 Change requirements.txt to contain:
 
 `` tensorflow==1.5 ``
+
+## Citing LSNN
+
+```
+@inproceedings{bellec2018long,
+  title={Long short-term memory and learning-to-learn in networks of spiking neurons},
+  author={Bellec, Guillaume and Salaj, Darjan and Subramoney, Anand and Legenstein, Robert and Maass, Wolfgang},
+  booktitle={Advances in Neural Information Processing Systems},
+  pages={787--797},
+  year={2018}
+}
+```
+
+## License
+
+LSNN-official is open source software and is licensed under the [BSD 3-Clause Clear License](https://spdx.org/licenses/BSD-3-Clause-Clear.html).

@@ -16,7 +16,7 @@ spikes = outputs[0]
 loss(spikes)
 ```
 
-In the folder `/lsnn` you may find source code for the lsnn library. In the folder `/bin` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1 from [1] and achieve __96%__ accuracy on the __sequential MNIST__ task with a __recurrent network of spiking neuron__. (Note, as we cleaned the code for thr purpose of the tutorial there are slight differences from the code used in [1]).
+In the folder `/lsnn` you may find source code for the lsnn package. In the folder `/bin` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1 from [1] and achieve more than __96%__ accuracy on the __sequential MNIST__ task with an LSNN. (Note, as we tried cleaning the code for the purpose of the tutorial there might be slight differences with the actual code used that we used in [1]).
 
 
 ## Installation

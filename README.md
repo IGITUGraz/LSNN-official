@@ -4,7 +4,7 @@ This repository provides a tensorflow library and a tutorial train a recurrent s
 For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2]. Please cite us if that's relevant.
 
 ## Usage
-After installation load the LSNN library, load the __LSNN tensorflow cell__, and use it in place of standard tensorflow rnn cells:
+After installation load the LSNN library, load the __LSNN tensorflow cell__, and use it in place of standard tensorflow 1.X rnn cells:
 
 ```python
 import lsnn  

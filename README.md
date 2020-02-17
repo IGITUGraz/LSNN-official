@@ -16,7 +16,7 @@ spikes = outputs[0]
 loss(spikes)
 ```
 
-In the folder `/lsnn` you may find the source code of the lsnn package. In the folder `/bin` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1 from [1] and achieve above __96%__ accuracy on the __sequential MNIST__ task with an LSNN. (Note, as we tried cleaning the code for the purpose of the tutorial and there might be slight differences with the actual code used that we used in [1]).
+In the folder `/lsnn` you may find the source code of the lsnn package. In the folder `/bin` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1 from [1] and achieve above __96%__ accuracy on the __sequential MNIST__ task with an LSNN. It requires about 24h of computation with one GPU GTX 1080. (Note, as we tried cleaning the code for the purpose of the tutorial and there might be slight differences with the code used in [1]).
 
 ## Installation
 

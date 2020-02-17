@@ -4,19 +4,19 @@ This repository provides a tensorflow library and a tutorial train a recurrent s
 For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2]. Please cite us if that's relevant.
 
 ## Usage
-After installation load the LSNN library:
+After installation load the LSNN library, load the __LSNN tensorflow cell__, and use it in place of standard tensorflow rnn cells:
 
-``` import lsnn ```
+```python
+import lsnn  
 
-Load the LSNN tensorflow cell, and use it in place of standard tensorflow rnn cells:
-
-```
-cell =  lsnn.ALIF(n_in=number_of_inputs, n_rec=num_of_outputs, ...)
+cell =  lsnn.ALIF(number_of_inputs, num_of_outputs, ...)
 outputs, final_state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
+
+spikes = outputs[0]
+loss(spikes)
 ```
 
-The folder `/lsnn` you may find source code for the lsnn library. In the folder `/bin` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can how achieve __96%__ accuracy on the __sequential MNIST__ task with a __recurrent network of spiking neuron__.
-Note that for the purpose of this tutorial, we simplified the task described in [1].
+In the folder `/lsnn` you may find source code for the lsnn library. In the folder `/bin` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1 from [1] and achieve __96%__ accuracy on the __sequential MNIST__ task with a __recurrent network of spiking neuron__. (Note, as we cleaned the code for thr purpose of the tutorial there are slight differences from the code used in [1]).
 
 
 ## Installation

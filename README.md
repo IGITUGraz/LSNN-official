@@ -1,24 +1,26 @@
 # LSNN: Long short-term memory Spiking Neural Networks
 
 This repository provides a tensorflow library and a tutorial train a recurrent spiking neural network (ours is called LSNN).
-For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2].
+For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2]. Please cite us if that's relevant.
 
-In the tutorial `tutorial_sequential_mnist_with_LSNN.py`, you can classify the MNIST digits when the pixels are provided one after the other.
+## Usage
+After installation load the LSNN library:
+
+``` import lsnn ```
+
+Load the LSNN tensorflow cell, and use it in place of standard tensorflow rnn cells:
+
+```
+cell =  lsnn.ALIF(n_in=number_of_inputs, n_rec=num_of_outputs, ...)
+outputs, final_state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
+```
+
+The folder `/lsnn` you may find source code for the lsnn library. In the folder `/bin` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can how achieve __96%__ accuracy on the __sequential MNIST__ task with a __recurrent network of spiking neuron__.
 Note that for the purpose of this tutorial, we simplified the task described in [1].
-
-The code was written by Guillaume Bellec and Darjan Salaj at the IGI institute of TU Graz between 2017 and 2018. Anand Subramoney and Arjun Rao helped to improve the implementation.
-
-[1] Long short-term memory and Learning-to-learn in networks of spiking neurons  
-Guillaume Bellec*, Darjan Salaj*, Anand Subramoney*, Robert Legenstein, Wolfgang Maass  
-NIPS 2018, [[link]](http://papers.nips.cc/paper/7359-long-short-term-memory-and-learning-to-learn-in-networks-of-spiking-neurons) [[arxiv]](https://arxiv.org/abs/1803.09574  )
-(\* equal contributions)
-
-[2] Deep Rewiring: Training very sparse deep networks  
-Guillaume Bellec, David Kappel, Wolfgang Maass, Robert Legenstein  
-ICLR 2018, [[link]](https://openreview.net/forum?id=BJ_wN01C-) [[arxiv]](https://arxiv.org/abs/1711.05136)
 
 
 ## Installation
+
 The code is compatible with python 3.4 to 3.7 and tensorflow 1.7 to 1.12 (CPU and GPU versions).
 
 > You can run the training scripts **without installation** by temporarily including the repo directory
@@ -60,6 +62,19 @@ A known workaround is to reinstall the LSNN package with older tensorflow versio
 Change requirements.txt to contain:
 
 `` tensorflow==1.5 ``
+
+## Credits
+
+The code was written by Guillaume Bellec and Darjan Salaj at the IGI institute of TU Graz between 2017 and 2018. Anand Subramoney and Arjun Rao helped to improve the implementation.
+
+[1] Long short-term memory and Learning-to-learn in networks of spiking neurons  
+Guillaume Bellec*, Darjan Salaj*, Anand Subramoney*, Robert Legenstein, Wolfgang Maass  
+NIPS 2018, [[link]](http://papers.nips.cc/paper/7359-long-short-term-memory-and-learning-to-learn-in-networks-of-spiking-neurons) [[arxiv]](https://arxiv.org/abs/1803.09574  )
+(\* equal contributions)
+
+[2] Deep Rewiring: Training very sparse deep networks  
+Guillaume Bellec, David Kappel, Wolfgang Maass, Robert Legenstein  
+ICLR 2018, [[link]](https://openreview.net/forum?id=BJ_wN01C-) [[arxiv]](https://arxiv.org/abs/1711.05136)
 
 ## Citing LSNN
 

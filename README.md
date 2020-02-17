@@ -46,10 +46,9 @@ Use flags to configure plotting and other parameters of the task, network or sim
 ## Troubleshooting
 
 ### Possible incompatibility with tf.variable_scope(..., reuse=??)
-The LIF and ALIF cells defined in `spiking_models.py` behave almost like any tensorflow cell. However, we define the tensorflow variables during initilization of the cell object.
-Instead, the default tensorflow cells define variables during the first call(...) of the cell object.
-This leads to some incompatibility with some deep learning framework like Ray for deep RL.
-To fix this one has to move the variable initialization into the __call__ method as done for standard tensorflow cells.
+The LIF and ALIF cells defined in `spiking_models.py` behave almost like any tensorflow cell. However, we define the tensorflow variables during initilization of the cell object instead of using the high level function `get_variables(...)` or `add_weights(...)` in Keras.  
+
+This leads to some incompatibility with some deep learning frameworks when cell objects created at different places are assumed to share parameters. To fix it, we recommend rewriting the variable definitions, but the compatibility with the rewiring package might becomes more tricky.
 
 ### Wrong compilation of tensorflow
 

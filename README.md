@@ -9,7 +9,7 @@ After installation load the LSNN library, load the __LSNN tensorflow cell__, and
 ```python
 import lsnn  
 
-cell =  lsnn.ALIF(number_of_inputs, num_of_outputs, ...)
+cell =  lsnn.ALIF(num_of_inputs, num_of_outputs, ...)
 outputs, final_state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
 
 spikes = outputs[0]

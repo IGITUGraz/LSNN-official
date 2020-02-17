@@ -1,6 +1,6 @@
 # LSNN: Long short-term memory Spiking Neural Networks
 
-This repository provides a tensorflow library and a tutorial train a recurrent spiking neural network (ours is called LSNN).
+This repository provides a tensorflow 1.X library and a tutorial to train a __recurrent spiking neural networks__ (ours is called LSNN).
 For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2]. Please cite us if that's relevant.
 
 ## Usage

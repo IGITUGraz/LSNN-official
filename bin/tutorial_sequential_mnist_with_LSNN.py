@@ -11,10 +11,8 @@ One should get approximately:
 - you should eventually get above 90% with 20k ~ 30k iterations.
 Successful runs should achieve up to 96% in 36k iterations (takes ~24h on GTX1080).
 
-The Clear BSD License
-
 Copyright (c) 2019 the LSNN team, institute for theoretical computer science, TU Graz
-All rights reserved.
+All rights reserved. (The Clear BSD License)
 
 Redistribution and use in source and binary forms, with or without modification, are permitted (subject to the limitations in the disclaimer below) provided that the following conditions are met:
 

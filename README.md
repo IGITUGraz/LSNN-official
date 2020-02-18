@@ -4,7 +4,7 @@ This repository provides a tensorflow 1.12 library and a tutorial to train a rec
 For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2]. Please cite us if that's relevant.
 
 ## Usage
-After installation load the LSNN library, load the LSNN tensorflow cell, and use it in place of standard tensorflow 1.12 rnn cells:
+After installation load the LSNN library, load our implementation of the ALIF tensorflow cell (adaptive leaky integrate and fire), and use it in place of standard tensorflow 1.12 rnn cells:
 
 ```python
 import lsnn  
@@ -16,7 +16,9 @@ spikes = outputs[0]
 loss(spikes)
 ```
 
-In the folder `lsnn/` you may find the source code of the lsnn package. In the folder `bin/` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1 from [1] and achieve above __96%__ accuracy on the __sequential MNIST__ task with an LSNN. It requires about 24h of computation with one GPU GTX 1080. (Note, we tried cleaning the code for the purpose of the tutorial and there might be slight differences with the code used in [1]).
+In the folder `lsnn/` you may find the source code of the lsnn package. In the folder `bin/` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1B from [1] and achieve above __96%__ accuracy on the __sequential MNIST__ task with an LSNN. It requires about 24h of computation with one GPU GTX 1080. (Note, we tried cleaning the code for the purpose of the tutorial and there might be slight differences with the code used in [1]).  
+
+The second tutorial `tutorial_storerecall_with_LSNN.py` solves a simplier task that runs in few minutes with CPUs. This simpler task requires to store and recall a binary symbol when appropriate cues are presented while ignoring other symbols. This simpler task is a good test to verify if a network has long-short term memory. For large delays between the store and recall cues, it requires adaptation as in LSNN, and vanilla leaky integrate and fire neurons cannot solve it. For a detailed description about the task we refer to the older version (v1) of the preprint [3].
 
 ## Installation
 
@@ -31,18 +33,6 @@ You can now import the tensorflow cell called ALIF (for adaptive leakey integrat
 Warning, the GPU compatible version of tensorflow is not part of the requirements by default.
 To use GPUs one should also install it:
  ``pip3 install --user tensorflow-gpu``.
-
-## Training and evaluation
-
-To train an LSNN on the sequential MNISt (sMNIST) task, run from the main folder:  
-``python3 bin/tutorial_sequential_mnist_with_LSNN.py``  
-This will reproduce the result labeled "DEEP R LSNN" in the Figure 1B of [1] with 1ms per pixel.
-
-To train an LSNN on the store-recall task, run from the main folder:  
-``python3 bin/tutorial_storerecall_with_LSNN.py``  
-This will also plot the input, network spikes, output and thresholds during training.
-
-Use flags to configure plotting and other parameters of the task, network or simulation.
 
 ## Troubleshooting
 
@@ -74,6 +64,10 @@ NIPS 2018, [[link]](http://papers.nips.cc/paper/7359-long-short-term-memory-and-
 [2] Deep Rewiring: Training very sparse deep networks  
 Guillaume Bellec, David Kappel, Wolfgang Maass, Robert Legenstein  
 ICLR 2018, [[link]](https://openreview.net/forum?id=BJ_wN01C-) [[arxiv]](https://arxiv.org/abs/1711.05136)
+
+[3] Biologically inspired alternatives to backpropagation through time for learning in recurrent neural nets  
+Guillaume Bellec*, Franz Scherr*, Elias Hajek, Darjan Salaj, Robert Legenstein, and Wolfgang Maass  
+arxiv 2019 [[arxiv]](https://arxiv.org/pdf/1901.09049.pdf) [[link to version 1 with store recall task]](https://arxiv.org/pdf/1901.09049v1.pdf)
 
 ## Citing LSNN
 

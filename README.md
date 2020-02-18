@@ -67,7 +67,7 @@ ICLR 2018, [[link]](https://openreview.net/forum?id=BJ_wN01C-) [[arxiv]](https:/
 
 [3] Biologically inspired alternatives to backpropagation through time for learning in recurrent neural nets  
 Guillaume Bellec*, Franz Scherr*, Elias Hajek, Darjan Salaj, Robert Legenstein, and Wolfgang Maass  
-arxiv 2019 [[arxiv]](https://arxiv.org/pdf/1901.09049.pdf) [[link to version 1 with store recall task]](https://arxiv.org/pdf/1901.09049v1.pdf)
+arxiv 2019 [[arxiv]](https://arxiv.org/abs/1901.09049) [[link to version 1 with store recall task]](https://arxiv.org/pdf/1901.09049v1.pdf)
 
 ## Citing LSNN
 

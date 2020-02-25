@@ -1,7 +1,7 @@
 ## LSNN: Long short-term memory Spiking Neural Networks
 
 This repository provides a tensorflow 1.12 library and a tutorial to train a recurrent spiking neural networks (ours is called LSNN).
-For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2]. Please cite us if that's relevant.
+For more details about LSNN see [1]. This model uses a method of network rewiring to keep a sparse connectivity during training, this method is called DEEP R and is described in [2]. Feel free to cite us if that's relevant.
 
 ## Usage
 After installation load the LSNN library, load our implementation of the ALIF tensorflow cell (adaptive leaky integrate and fire), and use it in place of standard tensorflow 1.12 rnn cells:

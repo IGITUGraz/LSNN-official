@@ -19,9 +19,9 @@ spikes = outputs[0]
 loss(spikes)
 ```
 
-In the folder `lsnn/` you may find the source code of the lsnn package. In the folder `bin/` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1B from [1] and achieve above __96%__ accuracy on the __sequential MNIST__ task with an LSNN. It requires about 24h of computation with one GPU GTX 1080. (Note, we tried cleaning the code for the purpose of the tutorial and there might be slight differences with the code used in [1]).  
+In the folder `lsnn/` you may find the source code of the lsnn package. In the folder `bin/` there is a selection of tutorials. With `tutorial_sequential_mnist_with_LSNN.py`, you can reproduce Figure 1B from [1] and achieve above __96%__ accuracy on the __sequential MNIST__ task with an LSNN (the code may not reproduce exactlty the results published in [1]).  
 
-The second tutorial `tutorial_storerecall_with_LSNN.py` solves a simplier task that runs in few minutes with CPUs. This simpler task requires to store and recall a binary symbol when appropriate cues are presented while ignoring other symbols. This simpler task is a good test to verify if a network has long-short term memory. For large delays between the store and recall cues, it requires adaptation as in LSNN, and vanilla leaky integrate and fire neurons cannot solve it. For a detailed description about the task we refer to the older version (v1) of the preprint [3].
+The second tutorial `tutorial_storerecall_with_LSNN.py` solves a simpler task that runs in few minutes with CPUs. This simpler task is a good test to verify if a network model has long-short term memory. For a detailed description about the task we refer to the older version (v1) of the preprint [3].
 
 ## Installation
 

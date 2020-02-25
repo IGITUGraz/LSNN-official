@@ -7,7 +7,10 @@ For more details about LSNN see [1]. This model uses a method of network rewirin
 After installation load the LSNN library, load our implementation of the ALIF tensorflow cell (adaptive leaky integrate and fire), and use it in place of standard tensorflow 1.12 rnn cells:
 
 ```python
+import tensorflow as tf  
 import lsnn  
+
+...
 
 cell =  lsnn.ALIF(num_of_inputs, num_of_outputs, ...)
 outputs, final_state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
